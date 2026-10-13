@@ -1,0 +1,566 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tzira Openhaim Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Italiana&family=Mrs+Saint+Delafield&family=Bellefair&family=Cinzel:wght@400&family=Assistant:wght@200;300;400&family=Playpen+Sans+Hebrew:wght@200;300&display=swap">
+<style>
+/* v13: calm and clean. One film, one arch, a lot of air. Cream and taupe bands (plaster kept very faint), rectangular imagery,
+   small tracked capitals, an engraved-stone footer. Hebrew / English with a working toggle. */
+:root {
+  --cream: #F3EEE7; --sand: #E9E1D6; --taupe: #A3937F;
+  --ink: #2F2721; --ink2: #5B4E42; --muted: #8B7C6D; --bronze: #8A6B4E; --line: rgba(74,62,51,.18);
+  --f-en: "Italiana", "Didot", "Times New Roman", serif;
+  --f-he: "Bellefair", "Frank Ruhl Libre", "Times New Roman", serif;
+  --f-body: "Assistant", "Arial Hebrew", Arial, sans-serif;
+  --f-hand: "Playpen Sans Hebrew", "Bellefair", cursive;
+  --f-cut: "Cinzel", "Trajan Pro", "Times New Roman", serif;
+  --gut: max(20px, 5vw);
+  --frame: 0px;
+  --pw: 100%;
+  color-scheme: light;
+}
+[hidden] { display: none !important; }
+html { overflow-x: clip; scroll-behavior: smooth; }
+body { margin: 0; background: var(--cream); color: var(--ink); font-family: var(--f-body); font-weight: 300; -webkit-font-smoothing: antialiased; }
+body.locked { overflow: hidden; height: 100%; }
+a { color: inherit; }
+button { font: inherit; color: inherit; }
+img { display: block; }
+:focus-visible { outline: 1px solid var(--bronze); outline-offset: 4px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.en { font-family: var(--f-en); direction: ltr; unicode-bidi: isolate; }
+.cap { display: inline-block; font-weight: 400; font-size: 10.5px; letter-spacing: .38em; text-transform: uppercase; color: var(--bronze); }
+.wrap { width: min(1240px, calc(100% - 2 * var(--gut))); margin-inline: auto; }
+.h2 { font-family: var(--f-he); font-weight: 400; font-size: clamp(34px, 3.8vw, 54px); line-height: 1.1; margin: 16px 0 0; text-wrap: balance; }
+[lang="en"] .h2, [lang="en"] h3, [lang="en"] .lead:not(.ab .lead) { font-family: var(--f-en); letter-spacing: .01em; }
+section { scroll-margin-top: 60px; }
+.band { padding-block: clamp(96px, 15vh, 170px); }
+.cream { background: linear-gradient(rgba(243,238,231,.86), rgba(243,238,231,.86)), url(tex/plaster.jpg) 0 0 / 760px; }
+.sand { background: linear-gradient(rgba(233,225,214,.84), rgba(233,225,214,.84)), url(tex/plaster.jpg) 0 0 / 760px; }
+.taupe { --ink: #F6F1EA; --ink2: #EFE7DC; --muted: #E6DACB; --bronze: #F4E4CC; --line: rgba(246,241,234,.35);
+  color: var(--ink); background: linear-gradient(rgba(163,147,127,.9), rgba(163,147,127,.9)), url(tex/plaster.jpg) 0 0 / 760px; }
+
+/* links & buttons */
+.lnk { display: inline-flex; align-items: center; gap: 12px; text-decoration: none; font-size: 12px; letter-spacing: .3em; text-transform: uppercase; padding-bottom: 8px; border-bottom: 1px solid currentColor; transition: opacity .4s, gap .4s; }
+.lnk:hover { gap: 18px; opacity: .75; }
+[lang="he"] .lnk:not(.en-only) { letter-spacing: .12em; font-size: 14px; }
+.btn { display: inline-flex; align-items: center; gap: 12px; padding: 15px 30px; border: 1px solid var(--ink); background: var(--ink); color: var(--cream); text-decoration: none; font-size: 14px; letter-spacing: .08em; cursor: pointer; transition: background .4s, color .4s; }
+.btn:hover { background: transparent; color: var(--ink); }
+
+/* ===== page frame ===== */
+.page { width: 100%; margin: 0; position: relative; overflow: clip; background: var(--cream); }
+
+/* ===== header ===== */
+.hdr { position: fixed; z-index: 20; left: 0; right: 0; top: 0; color: #F6F1EA; transition: background .5s, color .5s, top .4s, box-shadow .5s; }
+.hdr.solid { top: 0; background: rgba(243,238,231,.94); color: var(--ink); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: 0 1px 0 var(--line); }
+.hdr-in { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 20px; padding: 22px var(--gut) 20px; }
+.hdr.solid .hdr-in { padding-block: 16px; }
+.wm { text-decoration: none; display: grid; gap: 4px; direction: ltr; justify-self: start; text-align: center; }
+.wm b { font-family: var(--f-en); font-weight: 400; font-size: 19px; letter-spacing: .24em; white-space: nowrap; }
+@media (max-width: 480px) { .wm b { font-size: 15px; letter-spacing: .16em; } .wm span { font-size: 6.5px; letter-spacing: .4em; } }
+.wm span { font-size: 8px; letter-spacing: .52em; opacity: .75; }
+.nav { display: flex; gap: clamp(20px, 3vw, 44px); font-size: 13px; letter-spacing: .06em; }
+[lang="en"] .nav { font-size: 11px; letter-spacing: .3em; text-transform: uppercase; }
+.nav a { text-decoration: none; position: relative; padding-block: 6px; }
+.nav a::after { content: ""; position: absolute; inset: auto 0 0 0; height: 1px; background: currentColor; transform: scaleX(0); transition: transform .5s cubic-bezier(.2,.7,.2,1); }
+.nav a:hover::after { transform: none; }
+.tools { justify-self: end; display: flex; align-items: center; gap: 18px; }
+.lang { display: flex; align-items: center; gap: 8px; font-size: 11px; letter-spacing: .2em; direction: ltr; }
+.lang button { background: none; border: 0; padding: 6px 2px; cursor: pointer; opacity: .5; transition: opacity .3s; letter-spacing: inherit; }
+.lang button[aria-pressed="true"] { opacity: 1; border-bottom: 1px solid currentColor; }
+.lang i { width: 1px; height: 11px; background: currentColor; opacity: .4; }
+.menu-b { display: none; background: none; border: 0; padding: 6px 0; cursor: pointer; font-size: 11px; letter-spacing: .3em; text-transform: uppercase; }
+.mnav { position: fixed; inset: 0; z-index: 30; background: var(--cream); display: grid; align-content: center; justify-items: center; gap: 26px; font-family: var(--f-he); font-size: 34px; animation: fadeIn .4s ease; }
+[lang="en"] .mnav, .mnav[dir="ltr"] { font-family: var(--f-en); }
+.mnav a { text-decoration: none; }
+.mnav .x { position: absolute; top: 22px; inset-inline-end: var(--gut); background: none; border: 0; font-size: 12px; letter-spacing: .3em; cursor: pointer; }
+@keyframes fadeIn { from { opacity: 0; } }
+
+/* ===== hero: one quiet film, centred title ===== */
+.hero { position: relative; height: calc(100vh - 2 * var(--frame)); height: calc(100svh - 2 * var(--frame)); min-height: 560px; overflow: hidden; background: #1d1713; color: #F6F1EA; display: grid; place-items: center; text-align: center; }
+.hero video, .hero .poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: saturate(.66) contrast(.84) brightness(.93) sepia(.2); transform: scale(1.02); }
+.hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(38,29,22,.5) 0%, rgba(38,29,22,.3) 40%, rgba(38,29,22,.36) 70%, rgba(30,23,17,.6) 100%); }
+.hero::before { content: ""; position: absolute; inset: 0; z-index: 1; background: rgba(120,98,78,.16); mix-blend-mode: multiply; }
+.hero-t { position: relative; z-index: 2; display: grid; justify-items: center; gap: 24px; padding: 0 var(--gut); animation: rise 1.8s cubic-bezier(.2,.7,.2,1) .2s both; }
+.hero-t .cap { color: #EBDDC8; }
+.hero h1 { margin: 0; font-family: var(--f-en); font-weight: 400; font-size: clamp(46px, 8.2vw, 136px); line-height: .98; letter-spacing: .08em; text-transform: uppercase; display: grid; text-shadow: 0 2px 40px rgba(0,0,0,.2); direction: ltr; }
+.hero h1 span { display: block; }
+.hero .cap { direction: ltr; }
+.hero .lnk { color: #F6F1EA; margin-top: 10px; }
+.hero-cue { position: absolute; z-index: 2; bottom: 28px; left: 50%; width: 1px; height: 46px; background: linear-gradient(rgba(246,241,234,.9), transparent); animation: drip 2.4s ease-in-out infinite; transform-origin: top; }
+@keyframes drip { 0%,100% { transform: scaleY(.3); opacity: .4; } 50% { transform: scaleY(1); opacity: 1; } }
+@keyframes rise { from { opacity: 0; transform: translateY(26px); } }
+
+/* ===== about: taupe band, the site's single arch ===== */
+.about-stone { color: var(--ink); background: linear-gradient(rgba(236,228,217,.42), rgba(236,228,217,.42)), url(tex/bv_plaster.jpg) center / 1100px; box-shadow: inset 0 0 120px rgba(90,70,52,.12); }
+.about-stone .band { padding-block: clamp(80px, 12vh, 130px); }
+.ab { max-width: 720px; margin-inline: auto; text-align: center; display: grid; justify-items: center; }
+.ab .cap { color: #6E5843; }
+.sig { display: grid; justify-items: center; gap: 10px; margin: 26px 0 10px; }
+.sig .name { font-family: "Mrs Saint Delafield", "Brush Script MT", cursive; font-weight: 400; font-size: clamp(56px, 6.4vw, 108px); line-height: 1.2; white-space: nowrap; direction: ltr; padding: 0 .3em;
+  color: rgba(88,68,50,.62); text-shadow: 1px 1.5px 0 rgba(255,249,240,.6), -1px -1px 0 rgba(55,40,28,.38);
+  clip-path: inset(-20% 100% -20% 0); transition: clip-path 2.8s cubic-bezier(.55,.1,.35,1) .5s; }
+.rv.in .sig .name, .sig.in .name { clip-path: inset(-20% -5% -20% 0); }
+.sig .role { font-family: var(--f-cut); font-size: 11px; letter-spacing: .42em; color: rgba(98,80,62,.6); text-shadow: 1px 1px 0 rgba(255,250,242,.55), -1px -1px 0 rgba(70,54,40,.22); direction: ltr; opacity: 0; transition: opacity 1.4s ease 2.8s; }
+.rv.in .sig .role { opacity: 1; }
+.ab p { font-family: var(--f-hand); font-weight: 300; font-size: clamp(18px, 1.5vw, 21px); line-height: 1.9; margin: 0 0 12px; max-width: 46ch; text-wrap: pretty;
+  color: rgba(84,64,46,.82); text-shadow: 0 1px 0 rgba(255,250,240,.6), 0 -1px 0 rgba(58,42,28,.28); }
+.ab .lead { font-size: clamp(22px, 2vw, 27px); line-height: 1.6; color: rgba(70,52,37,.88); margin-top: 24px; }
+.ab .lnk { margin-top: 22px; }
+
+/* ===== words on design: quote on the plaster beside the driftwood ===== */
+.words { position: relative; min-height: min(66vh, 600px); display: grid; align-items: center; background: #DDD3C7 url(tex/plaster.jpg) 0 0 / 760px; overflow: hidden; }
+.words::before { content: ""; position: absolute; inset: 0; background: rgba(222,212,200,.78); }
+.words-img { position: absolute; inset-block: 0; inset-inline-start: 0; width: min(46%, 520px); background: url(tex/wood_wall.jpg) right 45% / cover; -webkit-mask-image: linear-gradient(to left, #000 62%, transparent); mask-image: linear-gradient(to left, #000 62%, transparent); }
+[dir="ltr"] .words-img { inset-inline-start: auto; inset-inline-end: 0; }
+.words-txt { position: relative; z-index: 2; width: min(640px, 54%); margin-inline-start: auto; margin-inline-end: clamp(30px, 8vw, 120px); text-align: center; display: grid; justify-items: center; padding-block: 80px; }
+[dir="ltr"] .words-txt { margin-inline-start: clamp(30px, 8vw, 120px); margin-inline-end: auto; }
+.hand { margin: 22px 0 0; min-height: 200px; display: grid; align-content: center; gap: 24px; }
+.hand p { margin: 0; font-family: var(--f-hand); font-weight: 200; font-size: clamp(28px, 3.3vw, 48px); line-height: 1.4; color: var(--ink); text-wrap: balance; }
+.hand p .w { display: inline-block; white-space: nowrap; }
+.hand p .ch { display: inline-block; opacity: 0; transform: translateY(6px) rotate(-3deg); filter: blur(3px); animation: ink .55s cubic-bezier(.2,.7,.2,1) forwards; animation-delay: calc(var(--i) * 45ms); }
+@keyframes ink { to { opacity: 1; transform: none; filter: none; } }
+.hand.out p, .hand.out figcaption { opacity: 0; transform: translateY(-10px); transition: opacity .8s ease, transform .8s ease; }
+.hand figcaption { font-family: var(--f-en); font-size: 17px; letter-spacing: .14em; color: var(--bronze); opacity: 0; transition: opacity 1s ease; }
+.hand figcaption.on { opacity: 1; }
+.hdots { display: flex; gap: 10px; justify-content: center; margin-top: 26px; }
+.hdots button { width: 26px; height: 2px; padding: 0; border: 0; background: rgba(74,62,51,.25); cursor: pointer; }
+.hdots button[aria-current="true"] { background: var(--bronze); }
+
+/* ===== portfolio: calm rectangular mosaic ===== */
+.head { display: flex; justify-content: space-between; align-items: end; gap: 20px; flex-wrap: wrap; margin-bottom: clamp(44px, 7vh, 80px); }
+.head p { margin: 0; color: var(--muted); font-size: 15px; }
+.pf { display: grid; grid-template-columns: 1.15fr 1fr 1fr; gap: clamp(12px, 1.6vw, 22px); }
+.pf-t { border: 0; padding: 0; background: none; cursor: pointer; display: grid; grid-template-rows: 1fr auto; gap: 14px; text-align: start; color: var(--ink); }
+.pf-t .ph { position: relative; overflow: hidden; aspect-ratio: 1 / 1.3; background: var(--sand); border-radius: 1000px 1000px 0 0; }
+.pf-t.big { grid-row: 1 / 3; } .pf-t.big .ph { aspect-ratio: auto; height: 100%; min-height: 440px; }
+.pf-t .ph img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 1.8s cubic-bezier(.2,.7,.2,1), filter 1s; }
+.pf-t:hover .ph img { transform: scale(1.035); }
+.pf-t .ttl { display: grid; gap: 4px; border-top: 1px solid var(--line); padding-top: 12px; }
+.pf-t .ttl .en { font-size: 19px; letter-spacing: .04em; }
+.pf-t small { color: var(--muted); font-size: 13px; }
+.pf-t.soon { cursor: default; }
+.pf-t.soon .ph { background: linear-gradient(rgba(233,225,214,.6), rgba(233,225,214,.6)), url(tex/bv_plaster.jpg) center / 700px; display: grid; place-items: center; }
+.pf-t.soon .ph b { font-family: var(--f-cut); font-weight: 400; font-size: 15px; letter-spacing: .5em; color: rgba(98,80,62,.55); text-shadow: 1px 1px 0 rgba(255,250,242,.6), -1px -1px 0 rgba(70,54,40,.25); }
+
+/* ===== interlude ===== */
+.inter { position: relative; height: min(78vh, 680px); display: grid; place-items: center; text-align: center; color: #F6F1EA; overflow: hidden; }
+.inter img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 55%; }
+.inter::after { content: ""; position: absolute; inset: 0; background: rgba(28,21,16,.36); }
+.inter > div { position: relative; z-index: 2; display: grid; justify-items: center; gap: 26px; padding: 0 var(--gut); }
+.inter p { margin: 0; font-family: var(--f-he); font-size: clamp(28px, 3.4vw, 50px); line-height: 1.25; max-width: 20ch; text-wrap: balance; }
+[lang="en"] .inter p { font-family: var(--f-en); }
+.inter .cap { color: #EBDDC8; }
+.inter .lnk { color: #F6F1EA; }
+
+/* ===== services: alternating rows ===== */
+.svc-head { max-width: 640px; }
+.svc-head p { font-size: 16.5px; line-height: 1.95; color: var(--ink2); margin: 20px 0 0; }
+.rows { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(36px, 6vw, 90px); margin-top: clamp(56px, 9vh, 100px); align-items: start; }
+.row { display: grid; gap: 30px; }
+.row .ph { aspect-ratio: 4 / 3.6; overflow: hidden; }
+.row .ph img { width: 100%; height: 100%; object-fit: cover; }
+.row .num { font-family: var(--f-en); font-size: 15px; letter-spacing: .3em; color: var(--bronze); }
+.row h3 { margin: 10px 0 18px; font-family: var(--f-he); font-weight: 400; font-size: clamp(28px, 2.6vw, 38px); line-height: 1.15; }
+.row p { margin: 0 0 16px; font-size: 16px; line-height: 1.95; color: var(--ink2); }
+.row ul { margin: 6px 0 22px; padding: 0; list-style: none; display: grid; gap: 0; border-top: 1px solid var(--line); }
+.row li { font-size: 15px; padding: 11px 0; border-bottom: 1px solid var(--line); color: var(--ink2); }
+.row .for { color: var(--muted); font-size: 15px; }
+.row .lnk { margin-top: 8px; }
+
+/* ===== contact ===== */
+.ct { display: grid; grid-template-columns: 1fr 1.1fr; gap: clamp(36px, 7vw, 110px); align-items: start; }
+.ct .sub { font-family: var(--f-he); font-size: 22px; color: var(--ink2); margin: 16px 0 0; }
+[lang="en"] .ct .sub { font-family: var(--f-en); }
+.details { margin-top: 44px; display: grid; gap: 10px; font-size: 15.5px; color: var(--ink2); }
+.details .v { direction: ltr; unicode-bidi: isolate; user-select: all; }
+.lcard { width: 190px; aspect-ratio: 936 / 700; border-radius: 1000px 1000px 0 0; overflow: hidden; opacity: .95; box-shadow: 0 10px 24px rgba(70,52,36,.18); }
+.fmark { display: grid; justify-items: center; }
+.details a { text-decoration: none; justify-self: start; border-bottom: 1px solid transparent; transition: border-color .3s; } .details a:hover { border-color: currentColor; }
+.fbase a { text-decoration: none; }
+.lcard img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 45%; }
+form { display: grid; grid-template-columns: 1fr 1fr; gap: 26px 28px; }
+.f { display: grid; gap: 6px; }
+.f.full { grid-column: 1 / -1; }
+.f label { font-size: 11px; letter-spacing: .24em; text-transform: uppercase; color: var(--muted); }
+[lang="he"] .f label { font-size: 14px; letter-spacing: .02em; }
+.f input, .f textarea { font: inherit; font-size: 17px; color: var(--ink); background: transparent; border: 0; border-bottom: 1px solid rgba(74,62,51,.3); padding: 8px 0 10px; border-radius: 0; }
+.f textarea { min-height: 96px; resize: vertical; }
+.f input:focus, .f textarea:focus { outline: none; border-bottom-color: var(--ink); }
+.send { grid-column: 1 / -1; display: flex; gap: 18px; align-items: center; flex-wrap: wrap; margin-top: 6px; }
+.note { margin: 0; font-size: 15px; color: var(--bronze); }
+
+/* ===== footer: carved into stone ===== */
+footer { background: linear-gradient(rgba(190,176,160,.25), rgba(190,176,160,.25)), url(tex/bv_plaster.jpg) center / 1100px; color: #4E4136; padding: clamp(44px, 7vh, 70px) var(--gut) calc(26px + env(safe-area-inset-bottom, 0px)); }
+.fcols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; font-size: 14px; line-height: 1.9; max-width: 1100px; margin-inline: auto; }
+.fcols .cap { color: #5E4D3E; margin-bottom: 8px; }
+.fcols a { text-decoration: none; display: block; }
+.fcols .v { direction: ltr; unicode-bidi: isolate; }
+.carve { margin: clamp(50px, 9vh, 90px) 0 0; text-align: center; font-family: var(--f-cut); font-weight: 400; font-size: clamp(34px, 8.4vw, 118px); line-height: 1; letter-spacing: .08em; white-space: nowrap; direction: ltr;
+  color: rgba(112,92,72,.42); text-shadow: 1px 1.5px 0 rgba(255,249,240,.55), -1px -1px 0 rgba(60,45,32,.38); }
+.fbase { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-top: clamp(30px, 5vh, 50px); font-size: 12.5px; letter-spacing: .08em; color: #66574A; max-width: 1100px; margin-inline: auto; }
+
+/* ===== project viewer ===== */
+.pv { position: fixed; inset: 0; z-index: 40; background: #F1ECE5; color: var(--ink); display: grid; grid-template-rows: auto 1fr auto; gap: clamp(10px, 2vh, 22px); padding: calc(18px + env(safe-area-inset-top, 0px)) var(--gut) calc(18px + env(safe-area-inset-bottom, 0px)); animation: fadeIn .5s ease; }
+.pv-top { display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+.pv-back { background: none; border: 0; border-bottom: 1px solid currentColor; padding: 6px 0; cursor: pointer; font-size: 13px; letter-spacing: .12em; white-space: nowrap; }
+.pv-title { text-align: end; display: grid; gap: 4px; }
+.pv-title h2 { margin: 0; font-weight: 400; font-size: clamp(28px, 3.2vw, 44px); line-height: 1; }
+.pv-title span { color: var(--muted); font-size: 14px; }
+.pv-stage { min-height: 0; height: 100%; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: clamp(10px, 2vw, 30px); }
+.pv-frame { position: relative; height: 100%; min-height: 0; }
+.pv-frame img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; transition: opacity .7s ease, transform .9s cubic-bezier(.2,.7,.2,1); }
+.pv-frame img.hide { opacity: 0; transform: translateX(var(--dx, 0)); }
+.pv-arrow { width: 52px; height: 52px; border: 1px solid rgba(74,62,51,.35); border-radius: 50%; background: none; font-size: 18px; cursor: pointer; transition: background .3s, color .3s; }
+.pv-arrow:hover { background: var(--ink); color: var(--cream); }
+.pv-bottom { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 18px; }
+.pv-cap { font-family: var(--f-he); font-size: 19px; }
+.pv-n { justify-self: end; font-size: 17px; color: var(--muted); letter-spacing: .12em; }
+.pv-thumbs { display: flex; gap: 8px; overflow-x: auto; max-width: 60vw; padding: 4px; }
+.pv-thumbs button { flex: 0 0 auto; width: 64px; height: 48px; padding: 0; border: 1px solid transparent; overflow: hidden; cursor: pointer; opacity: .45; background: var(--sand); }
+.pv-thumbs button img { width: 100%; height: 100%; object-fit: cover; }
+.pv-thumbs button[aria-current="true"] { opacity: 1; border-color: var(--ink); }
+
+/* reveal */
+.rv { opacity: 0; transform: translateY(28px); transition: opacity 1.2s ease, transform 1.4s cubic-bezier(.2,.7,.2,1); }
+.rv.in { opacity: 1; transform: none; }
+
+/* cursor */
+.cur, .cur-dot { position: fixed; z-index: 60; left: 0; top: 0; pointer-events: none; border-radius: 50%; }
+.cur { width: 44px; height: 44px; margin: -22px 0 0 -22px; border: 1px solid #A88660; transition: width .45s cubic-bezier(.2,.7,.2,1), height .45s cubic-bezier(.2,.7,.2,1), margin .45s cubic-bezier(.2,.7,.2,1), background .4s, border-color .4s; display: grid; place-items: center; font-family: var(--f-en); font-size: 13px; letter-spacing: .22em; color: transparent; }
+.cur-dot { width: 6px; height: 6px; margin: -3px 0 0 -3px; background: #A88660; transition: opacity .3s, transform .3s; }
+.cur.link { width: 70px; height: 70px; margin: -35px 0 0 -35px; background: rgba(168,134,96,.14); }
+.cur.big { width: 120px; height: 120px; margin: -60px 0 0 -60px; background: rgba(47,39,33,.42); backdrop-filter: blur(5px); color: #F6F1EA; border-color: rgba(246,241,234,.6); }
+.cur.press { width: 30px; height: 30px; margin: -15px 0 0 -15px; }
+.cur-dot.hide { opacity: 0; transform: scale(0); }
+@media (pointer: coarse) { .cur, .cur-dot { display: none; } }
+
+@media (max-width: 900px) {
+  .nav { display: none; } .menu-b { display: block; }
+  .hdr-in { grid-template-columns: 1fr auto; }
+  .ab, .row, .ct, form, .fcols { grid-template-columns: 1fr; }
+  .rows { grid-template-columns: 1fr; }
+  .pf { grid-template-columns: 1fr 1fr; } .pf-t.big { grid-row: auto; grid-column: 1 / -1; } .pf-t.big .ph { min-height: 0; aspect-ratio: 4 / 4.2; }
+  .words { min-height: 520px; }
+  .words-img, [dir="ltr"] .words-img { width: 70%; -webkit-mask-image: linear-gradient(to left, rgba(0,0,0,.55), transparent); mask-image: linear-gradient(to left, rgba(0,0,0,.55), transparent); }
+  .words-txt, [dir="ltr"] .words-txt { width: auto; margin: 0 var(--gut); padding-block: 60px; }
+  .pv-stage { grid-template-columns: 1fr; } .pv-arrow { display: none; }
+  .pv-bottom { grid-template-columns: 1fr auto; } .pv-thumbs { grid-column: 1 / -1; grid-row: 2; max-width: 100%; }
+}
+@media (max-width: 700px) { .page, .hdr { width: 100%; } .page { margin: 0; } .hdr { top: 0; } body { background-attachment: scroll; } .hero { height: 100svh; } :root { --frame: 0px; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01s !important; animation-delay: 0s !important; transition-duration: .01s !important; } .rv { opacity: 1; transform: none; } }
+</style>
+</head>
+<body>
+
+<header class="hdr" id="hdr" dir="rtl" lang="he"><div class="hdr-in">
+  <a class="wm" href="#top" aria-label="TZIRA OPENHAIM"><b>TZIRA OPENHAIM</b><span>INTERIOR DESIGN STUDIO</span></a>
+  <nav class="nav" data-ta="nav.label" aria-label="ניווט ראשי"><a href="#about" data-t="nav.about">אודות</a><a href="#work" data-t="nav.work">פרויקטים</a><a href="#process" data-t="nav.svc">שירותים</a><a href="#contact" data-t="nav.ct">צרו קשר</a></nav>
+  <div class="tools">
+    <div class="lang" role="group" aria-label="Language · שפה"><button type="button" data-lang="he" aria-pressed="true">עב</button><i></i><button type="button" data-lang="en" aria-pressed="false">EN</button></div>
+    <button class="menu-b" type="button" id="menu-b" data-t="menu">תפריט</button>
+  </div>
+</div></header>
+<nav class="mnav" id="mnav" hidden dir="rtl" lang="he"><button class="x" type="button" id="mnav-x" data-t="close">סגירה</button><a href="#about" data-t="nav.about">אודות</a><a href="#work" data-t="nav.work">פרויקטים</a><a href="#process" data-t="nav.svc">שירותים</a><a href="#contact" data-t="nav.ct">צרו קשר</a></nav>
+
+<div class="page" id="page" dir="rtl" lang="he">
+<section class="hero" id="top" data-ta="hero.label" aria-label="פתיחה">
+  <img class="poster" src="reel_h_poster.jpg" alt=""><video id="bg" muted loop playsinline preload="auto" aria-hidden="true"></video>
+  <div class="hero-t">
+    <span class="cap">Tzira Openhaim · Jerusalem</span>
+    <h1><span>Interior</span><span>Design</span><span>Studio</span></h1>
+    <a class="lnk en-only" href="#work">View Projects</a>
+  </div>
+  <i class="hero-cue" aria-hidden="true"></i>
+</section>
+
+<section id="about" class="about-stone" aria-labelledby="about-h"><div class="wrap band"><div class="ab rv">
+    <span class="cap" data-t="about.cap">About</span>
+    <h2 class="sr" id="about-h" data-t="about.h">אודות</h2>
+    <p class="lead" data-t="about.lead">צירה אופנהיים — מתכננת ומעצבת פנים, ואמנית סטיילינג.</p>
+    <p data-t="about.p1">מלווה בתים וחללים יוקרתיים מהרגע שבו נטווה החלום הראשון, ועד לפריט הסטיילינג האחרון שמשלים את התמונה.</p>
+    <p data-t="about.p2">יחד נהפוך את החלום לבית — מתוך הקשבה מלאה לאופן שבו אתם חיים, בדיוק תכנוני ובתחושת בית, עם חומרים נכונים ותשומת לב לכל פרט, במסע אישי, אומנותי ומרגש.</p>
+    <div class="sig" role="img" aria-label="Tzira Openhaim signature"><span class="name">Tzira Openhaim</span><span class="role">INTERIOR DESIGNER · STYLIST</span></div>
+    <a class="lnk" href="#contact" data-t="about.cta">בואו נדבר על הפרויקט</a>
+</div></div></section>
+
+<section class="words" aria-labelledby="words-h">
+  <div class="words-img" aria-hidden="true"></div>
+  <div class="words-txt">
+    <span class="cap" data-t="words.cap">Words on Design</span><h2 class="sr" id="words-h" data-t="words.h">מילים על עיצוב</h2>
+    <figure class="hand" aria-live="polite"><p id="hq"></p><figcaption id="ha"></figcaption></figure>
+    <div class="hdots" id="hdots"></div>
+  </div>
+</section>
+
+<section id="work" class="cream" aria-labelledby="work-h"><div class="wrap band">
+  <div class="head rv"><div><span class="cap" data-t="work.cap">Portfolio</span><h2 class="h2" id="work-h" data-t="work.h">פרויקטים נבחרים</h2></div><p data-t="work.p">לחיצה על פרויקט פותחת את הגלריה המלאה שלו.</p></div>
+  <div class="pf rv">
+    <button class="pf-t big" type="button" data-proj="golden" data-cur="View"><div class="ph"><img src="rooms/dining.jpg" alt="" loading="lazy"></div><span class="ttl"><span class="en">Golden Hour</span><small data-t="p.golden">דירה במרכז · תכנון ועיצוב</small></span></button>
+    <button class="pf-t" type="button" data-proj="daydreams" data-cur="View"><div class="ph"><img src="rooms/nursery.jpg" alt="" loading="lazy" style="object-position:72% 50%"></div><span class="ttl"><span class="en">Little Daydreams</span><small data-t="p.day">דירת משפחה · תכנון נגרות</small></span></button>
+    <button class="pf-t" type="button" data-proj="haven" data-cur="View"><div class="ph"><img src="rooms/nook.jpg" alt="" loading="lazy"></div><span class="ttl"><span class="en">The Quiet Haven</span><small data-t="p.haven">בית פרטי · תכנון ועיצוב</small></span></button>
+    <div class="pf-t soon"><div class="ph"><b>SOON</b></div><span class="ttl"><span class="en">The Learning Atelier</span><small data-t="p.soon">בקרוב</small></span></div>
+    <div class="pf-t soon"><div class="ph"><b>SOON</b></div><span class="ttl"><span class="en">A World of Wonder</span><small data-t="p.soon">בקרוב</small></span></div>
+  </div>
+</div></section>
+
+<section class="inter" aria-labelledby="inter-h">
+  <img src="rooms/library.jpg" alt="" loading="lazy">
+  <div class="rv"><span class="cap">Tzira Openhaim</span><p id="inter-h" data-t="inter.p">מרגע טווית החלום הראשון ועד לפריטי הסטיילינג הקטנים.</p><a class="lnk" href="#process" data-t="inter.cta">לשירותי הסטודיו</a></div>
+</section>
+
+<section id="process" class="cream" aria-labelledby="svc-h"><div class="wrap band">
+  <div class="svc-head rv">
+    <span class="cap" data-t="svc.cap">Services</span>
+    <h2 class="h2" id="svc-h" data-t="svc.h">שירותי הסטודיו</h2>
+    <p data-t="svc.p">שני מסלולי עבודה — אחד לתכנון עומק מהיסוד, ואחד לשדרוג מהיר ומדויק. בשניהם אותה שפה: חומרים חמים, פרופורציות נכונות וסטיילינג שנותן לחלל נשימה.</p>
+  </div>
+  <div class="rows"><article class="row rv">
+    <div class="ph"><img src="rooms/moodboard.jpg" alt="" loading="lazy" style="object-position: 50% 40%"></div>
+    <div>
+      <span class="num">01</span><h3 data-t="s1.h">ליווי מעטפת מלאה</h3>
+      <p data-t="s1.p">ליווי צמוד מהרעיון ועד המסירה. מתחילים בפגישת פרוגרמה שבה מבינים אתכם, את החלל ואת אורח החיים — וממשיכים לתכנון מלא, בחירת חומרים וריהוט, וליווי מול כל בעלי המקצוע לאורך כל הביצוע. אני נשארת אתכם עד הפרט האחרון, לגמר מושלם שבו הכול פשוט במקום.</p>
+      <ul data-t="s1.ul"><li>פגישת פרוגרמה ואפיון אורח חיים</li><li>תכנון אדריכלי־פנימי: חלוקת חלל, תנועה ופרופורציות</li><li>תוכניות עבודה, פרטי נגרות, חשמל ותאורה</li><li>בחירת חומרים, גימורים, ריהוט וטקסטיל</li><li>ליווי בעלי מקצוע ופיקוח עליון עד המסירה</li></ul>
+      <p class="for" data-t="s1.for">לאניני טעם שמבינים בעיצובי פרמיום ובבית מהקטלוגים, ולא רוצים להתפשר על פחות ממושלם. מתאים למי שרוצה שקט נפשי ותוצאה שלמה, בלי להתעסק בפרטים לבד.</p>
+      <a class="lnk" href="#contact" data-t="svc.cta">בואו נדבר</a>
+    </div>
+  </article>
+  <article class="row rv">
+    <div class="ph"><img src="rooms/palette.jpg" alt="" loading="lazy" style="object-position: 50% 35%"></div>
+    <div>
+      <span class="num">02</span><h3 data-t="s2.h">מייקאובר בהילוך מהיר</h3>
+      <p data-t="s2.p">צמד פגישות לשדרוג מהיר של הבית או העסק — בלי לגעת בתשתיות. בפגישה הראשונה נתכנן את החלל ואת הקונספט; בפגישה השנייה יוצאים לשטח ליום רכישות, בוחרים ומחליפים ריהוט, טקסטיל ופרטי סטיילינג — ומגיעים לתוצאה מלאה, מיד.</p>
+      <ul data-t="s2.ul"><li>פגישת אבחון בחלל וקביעת קונספט וצבעוניות</li><li>תכנית פעולה ממוקדת עם תקציב ברור</li><li>יום רכישות משותף — ריהוט, תאורה, טקסטיל ואקססוריז</li><li>סידור וסטיילינג בפועל ביום העבודה</li><li>טיפים לתחזוקה והמשך שדרוג בקצב שלכם</li></ul>
+      <p class="for" data-t="s2.for">מתאים לבעלי עסקים קטנים ולמי שרוצה לרענן את הבית ולראות שינוי אמיתי, מהר.</p>
+      <a class="lnk" href="#contact" data-t="svc.cta">בואו נדבר</a>
+    </div>
+  </article></div>
+</div></section>
+
+<section id="contact" class="sand" aria-labelledby="ct-h"><div class="wrap band"><div class="ct">
+  <div class="rv">
+    <span class="cap" data-t="ct.cap">Contact</span>
+    <h2 class="h2" id="ct-h" data-t="ct.h">צרו קשר</h2>
+    <p class="sub" data-t="ct.sub">צעד ראשון להגשת החלום כאן.</p>
+    <div class="details"><a class="v" href="tel:+972527670335">052-767-0335</a><a class="v" href="mailto:openhaim.studio@gmail.com">openhaim.studio@gmail.com</a><span data-t="ct.where">ירושלים · פגישות בתיאום מראש</span></div>
+  </div>
+  <form id="form" class="rv" novalidate>
+    <div class="f"><label for="c-name" data-t="f.name">שם</label><input id="c-name" autocomplete="name"></div>
+    <div class="f"><label for="c-phone" data-t="f.phone">טלפון</label><input id="c-phone" type="tel" dir="ltr" autocomplete="tel"></div>
+    <div class="f full"><label for="c-mail" data-t="f.mail">אימייל</label><input id="c-mail" type="email" dir="ltr" autocomplete="email"></div>
+    <div class="f full"><label for="c-msg" data-t="f.msg">מה תרצו לשתף לגבי הפרויקט?</label><textarea id="c-msg"></textarea></div>
+    <div class="send"><button class="btn" type="submit" data-t="f.send">שליחת פנייה</button><p class="note" id="note" role="status"></p></div>
+  </form>
+</div></div></section>
+
+<footer>
+  <div class="fmark"><div class="lcard" aria-hidden="true"><img src="logo_card.jpg" alt=""></div></div>
+  <div class="fbase"><span data-t="ft.copy">© 2026 צירה אופנהיים · עיצוב פנים</span><a href="#top" data-t="ft.top">חזרה למעלה ↑</a></div>
+</footer>
+</div>
+
+<div class="pv" id="pv" hidden role="dialog" aria-modal="true" aria-labelledby="pv-t" dir="rtl" lang="he">
+  <div class="pv-top"><button class="pv-back" type="button" id="pv-x" data-t="pv.back">חזרה לפרויקטים</button><div class="pv-title"><h2 class="en" id="pv-t"></h2><span id="pv-m"></span></div></div>
+  <div class="pv-stage" id="pv-stage">
+    <button class="pv-arrow" type="button" id="pv-prev" data-ta="pv.prev" aria-label="התמונה הקודמת">→</button>
+    <div class="pv-frame"><img id="pv-img" alt=""><img id="pv-img2" alt="" aria-hidden="true" class="hide"></div>
+    <button class="pv-arrow" type="button" id="pv-next" data-ta="pv.next" aria-label="התמונה הבאה">←</button>
+  </div>
+  <div class="pv-bottom"><span class="pv-cap" id="pv-cap"></span><div class="pv-thumbs" id="pv-thumbs"></div><span class="pv-n en" id="pv-n"></span></div>
+</div>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const body = document.body, reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- English copy ---------- */
+  const EN = {
+    'nav.label': 'Main navigation', 'nav.about': 'About', 'nav.work': 'Projects', 'nav.svc': 'Services', 'nav.ct': 'Contact',
+    'menu': 'Menu', 'close': 'Close', 'hero.label': 'Opening',
+    'hero.cap': 'Interior Design Studio · Jerusalem', 'hero.h1': 'Boutique interiors, beautifully considered', 'hero.cta': 'View projects',
+    'about.alt': 'Entrance lobby', 'about.cap': 'About', 'about.h': 'About',
+    'about.lead': 'Tzira Openhaim — interior planner, designer and styling artist.',
+    'about.p1': 'Guiding luxury homes and spaces from the moment the first thread of a dream is spun, to the final styling piece that completes the picture.',
+    'about.p2': 'Together we’ll turn the dream into a home — listening closely to the way you live, with precise planning and a true feeling of home, the right materials and care for every detail, on a personal, artistic and moving journey.',
+    'about.cta': 'Let’s talk about your project',
+    'words.cap': 'Words on Design', 'words.h': 'Words on design',
+    'work.cap': 'Portfolio', 'work.h': 'Selected Projects', 'work.p': 'Select a project to open its full gallery.',
+    'p.golden': 'City-centre apartment · Planning & design', 'p.day': 'Family apartment · Bespoke joinery', 'p.haven': 'Private house · Planning & design', 'p.soon': 'Coming soon',
+    'inter.p': 'From the first thread of a dream to the final styling details.', 'inter.cta': 'Studio services',
+    'svc.cap': 'Services', 'svc.h': 'Studio Services',
+    'svc.p': 'Two ways of working — one for in-depth planning from the ground up, one for a quick, precise upgrade. Both speak the same language: warm materials, true proportions and styling that lets a space breathe.',
+    'svc.cta': 'Let’s talk',
+    's1.h': 'Full-Service Interior Design',
+    's1.p': 'Close guidance from first idea to handover. We begin with a programme meeting to understand you, the space and the way you live — then move on to full planning, materials and furniture, and coordination with every trade throughout the build. I stay with you to the last detail, for a flawless finish where everything simply falls into place.',
+    's1.ul': '<li>Programme meeting and lifestyle brief</li><li>Interior architecture: layout, flow and proportion</li><li>Working drawings, joinery, electrical and lighting plans</li><li>Materials, finishes, furniture and textiles</li><li>Trade coordination and design supervision to handover</li>',
+    's1.for': 'For discerning clients who know premium design and catalogue-worthy homes, and won’t settle for less than perfect. Ideal if you want peace of mind and a complete result, without handling the details alone.',
+    's2.h': 'Express Makeover',
+    's2.p': 'Two meetings for a quick upgrade of your home or business — with no construction. In the first we plan the space and the concept; in the second we head out for a shopping day, choosing and replacing furniture, textiles and styling pieces — for a complete result, right away.',
+    's2.ul': '<li>On-site consultation, concept and colour palette</li><li>A focused action plan with a clear budget</li><li>A shared shopping day — furniture, lighting, textiles and accessories</li><li>Hands-on arranging and styling on the day</li><li>Tips for upkeep and further upgrades at your own pace</li>',
+    's2.for': 'Ideal for small business owners and anyone who wants to refresh their home and see real change, fast.',
+    'ct.cap': 'Contact', 'ct.h': 'Get in touch', 'ct.sub': 'The first step toward your dream starts here.',
+    'ct.phone': 'Phone', 'ct.mail': 'Email', 'ct.where': 'Jerusalem · Meetings by appointment',
+    'f.name': 'Name', 'f.phone': 'Phone', 'f.mail': 'Email', 'f.msg': 'What would you like to share about your project?', 'f.send': 'Send enquiry',
+    'ft.ct': 'Contact', 'ft.studio': 'Studio', 'ft.nav': 'Explore', 'ft.copy': '© 2026 Tzira Openhaim · Interior Design', 'ft.top': 'Back to top ↑',
+    'pv.back': 'Back to projects', 'pv.prev': 'Previous image', 'pv.next': 'Next image',
+  };
+  const HE = {}, HEA = {};
+  document.querySelectorAll('[data-t]').forEach(n => HE[n.dataset.t] = n.innerHTML);
+  document.querySelectorAll('[data-ta]').forEach(n => HEA[n.dataset.ta] = n.getAttribute(n.tagName === 'IMG' ? 'alt' : 'aria-label'));
+  let lang = 'he';
+  const T = (he, en) => lang === 'en' ? en : he;
+
+  /* ---------- hero film ---------- */
+  const v = $('bg');
+  const tall = innerHeight > innerWidth * 1.05;
+  v.src = tall ? 'reel_v_1080.mp4' : 'reel_h_1080.mp4';
+  v.poster = tall ? 'reel_v_poster.jpg' : 'reel_h_poster.jpg';
+  document.querySelector('.hero .poster').src = v.poster;
+  v.addEventListener('playing', () => { const p = document.querySelector('.hero .poster'); if (p) p.style.opacity = 0; });
+  v.play().catch(() => {});
+
+  /* ---------- header ---------- */
+  const hdr = $('hdr'), hero = $('top');
+  const onScroll = () => hdr.classList.toggle('solid', scrollY > hero.offsetTop + hero.offsetHeight - 90);
+  addEventListener('scroll', onScroll, { passive: true }); onScroll();
+  const mnav = $('mnav');
+  $('menu-b').addEventListener('click', () => { mnav.hidden = false; body.classList.add('locked'); });
+  const closeMenu = () => { mnav.hidden = true; body.classList.remove('locked'); };
+  $('mnav-x').addEventListener('click', closeMenu);
+  mnav.querySelectorAll('a').forEach(a => a.addEventListener('click', closeMenu));
+
+  /* ---------- reveal ---------- */
+  const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: .15 });
+  document.querySelectorAll('.rv').forEach(el => io.observe(el));
+
+  /* ---------- project viewer ---------- */
+  const PROJ = {
+    golden: { t: 'Golden Hour', m: ['דירה במרכז · תכנון ועיצוב', 'City-centre apartment · Planning & design'], imgs: [['rooms/dining.jpg', 'פינת אוכל', 'Dining'], ['rooms/living.jpg', 'סלון', 'Living room'], ['rooms/library.jpg', 'ספרייה ופינת אוכל', 'Library & dining'], ['rooms/entrance.jpg', 'לובי כניסה', 'Entrance lobby']] },
+    haven: { t: 'The Quiet Haven', m: ['בית פרטי · תכנון ועיצוב', 'Private house · Planning & design'], imgs: [['rooms/nook.jpg', 'פינת ישיבה בחלון', 'Window seat'], ['rooms/bedroom.jpg', 'חדר שינה', 'Bedroom'], ['rooms/bedroom_angle.jpg', 'חדר שינה', 'Bedroom']] },
+    daydreams: { t: 'Little Daydreams', m: ['דירת משפחה · תכנון נגרות', 'Family apartment · Bespoke joinery'], imgs: [['rooms/nursery.jpg', 'חדר תינוק', 'Nursery'], ['rooms/kids.jpg', 'חדר ילדים', 'Children’s room']] },
+  };
+  const pv = $('pv'), thumbs = $('pv-thumbs'); let front = $('pv-img'), back = $('pv-img2'), cur = null, pi = 0, lastFocus = null;
+  const cap = im => T(im[1], im[2]);
+  const meta = () => { $('pv-m').textContent = T(...cur.m); $('pv-cap').textContent = cap(cur.imgs[pi]); front.alt = cap(cur.imgs[pi]); $('pv-n').textContent = String(pi + 1).padStart(2, '0') + ' / ' + String(cur.imgs.length).padStart(2, '0'); [...thumbs.children].forEach((b, k) => { b.setAttribute('aria-current', k === pi); b.setAttribute('aria-label', cap(cur.imgs[k])); }); };
+  function open(key) {
+    cur = PROJ[key]; pi = 0; lastFocus = document.activeElement;
+    $('pv-t').textContent = cur.t; thumbs.innerHTML = '';
+    cur.imgs.forEach(([src], i) => { const b = document.createElement('button'); b.type = 'button'; b.innerHTML = `<img src="${src}" alt="">`; b.addEventListener('click', () => show(i, i > pi ? 1 : -1)); thumbs.appendChild(b); });
+    front.src = cur.imgs[0][0]; front.classList.remove('hide'); back.classList.add('hide');
+    meta(); pv.hidden = false; body.classList.add('locked'); $('pv-x').focus();
+  }
+  function show(i, dir) {
+    if (!cur) return; i = (i + cur.imgs.length) % cur.imgs.length; if (i === pi) return; pi = i;
+    const s = lang === 'en' ? -1 : 1;
+    back.style.setProperty('--dx', (dir * s > 0 ? -40 : 40) + 'px'); front.style.setProperty('--dx', (dir * s > 0 ? 40 : -40) + 'px');
+    back.src = cur.imgs[pi][0]; back.classList.add('hide'); void back.offsetWidth;
+    back.classList.remove('hide'); front.classList.add('hide'); [front, back] = [back, front]; meta();
+  }
+  const close = () => { pv.hidden = true; body.classList.remove('locked'); if (lastFocus) lastFocus.focus(); };
+  $('pv-x').addEventListener('click', close);
+  $('pv-next').addEventListener('click', () => show(pi + 1, 1));
+  $('pv-prev').addEventListener('click', () => show(pi - 1, -1));
+  addEventListener('keydown', e => {
+    if (e.key === 'Escape' && !mnav.hidden) closeMenu();
+    if (pv.hidden) return; if (e.key === 'Escape') close();
+    const fwd = lang === 'en' ? 'ArrowRight' : 'ArrowLeft', bwd = lang === 'en' ? 'ArrowLeft' : 'ArrowRight';
+    if (e.key === fwd) show(pi + 1, 1); if (e.key === bwd) show(pi - 1, -1);
+  });
+  let sx = null; $('pv-stage').addEventListener('touchstart', e => sx = e.touches[0].clientX, { passive: true });
+  $('pv-stage').addEventListener('touchend', e => { if (sx === null) return; let d = e.changedTouches[0].clientX - sx; if (lang === 'en') d = -d; if (Math.abs(d) > 45) show(pi + (d > 0 ? 1 : -1), d > 0 ? 1 : -1); sx = null; });
+  document.querySelectorAll('.pf-t[data-proj]').forEach(b => b.addEventListener('click', () => open(b.dataset.proj)));
+
+  /* ---------- cursor ---------- */
+  if (matchMedia('(pointer: fine)').matches && !reduce) {
+    const c = document.createElement('div'), d = document.createElement('div');
+    c.className = 'cur'; d.className = 'cur-dot'; [c, d].forEach(e => { e.setAttribute('aria-hidden', 'true'); body.appendChild(e); });
+    let tx = innerWidth / 2, ty = innerHeight / 2, x = tx, y = ty;
+    addEventListener('mousemove', e => { tx = e.clientX; ty = e.clientY; d.style.transform = `translate(${tx}px, ${ty}px)`; });
+    addEventListener('mousedown', () => c.classList.add('press')); addEventListener('mouseup', () => c.classList.remove('press'));
+    (function loop() { x += (tx - x) * .14; y += (ty - y) * .14; c.style.transform = `translate(${x}px, ${y}px)`; requestAnimationFrame(loop); })();
+    const set = (cls, txt) => { c.classList.remove('big', 'link'); if (cls) c.classList.add(cls); c.textContent = txt || ''; d.classList.toggle('hide', !!cls); };
+    document.addEventListener('mouseover', e => {
+      const lab = e.target.closest('[data-cur]'), lnk = e.target.closest('a, button, input, textarea');
+      if (lab) set('big', lab.dataset.cur); else if (lnk) set('link'); else set(null);
+    });
+    document.querySelectorAll('.btn, .lnk').forEach(el => {
+      el.addEventListener('mousemove', e => { const r = el.getBoundingClientRect(); el.style.transform = `translate(${(e.clientX - r.left - r.width / 2) * .15}px, ${(e.clientY - r.top - r.height / 2) * .25}px)`; });
+      el.addEventListener('mouseleave', () => el.style.transform = '');
+    });
+  }
+
+  /* ---------- handwritten quotes ---------- */
+  const QUOTES = [
+    ['״אני חולם את הציור שלי, ואחר כך מצייר את החלום שלי.״', '“I dream my painting and I paint my dream.”', 'Vincent van Gogh · וינסנט ואן גוך', 'Vincent van Gogh'],
+    ['״הפרטים אינם פרטים — הם עושים את העיצוב.״', '“The details are not the details. They make the design.”', 'Charles Eames · צ\'ארלס איימס', 'Charles Eames'],
+    ['״עיצוב טוב הוא כמה שפחות עיצוב.״', '“Good design is as little design as possible.”', 'Dieter Rams · דיטר ראמס', 'Dieter Rams'],
+    ['״צורה ותפקיד הם אחד.״', '“Form and function are one.”', 'Frank Lloyd Wright · פרנק לויד רייט', 'Frank Lloyd Wright'],
+    ['״הפשטות היא התחכום האולטימטיבי.״', '“Simplicity is the ultimate sophistication.”', 'Leonardo da Vinci · לאונרדו דה וינצ\'י', 'Leonardo da Vinci'],
+    ['״אלגנטיות היא כשהפְּנים יפים כמו החוץ.״', '“Elegance is when the inside is as beautiful as the outside.”', 'Coco Chanel · קוקו שאנל', 'Coco Chanel'],
+  ];
+  const hq = $('hq'), ha = $('ha'), hand = hq.parentElement, hd = $('hdots'); let qi = -1, qt, qt2;
+  QUOTES.forEach((_, i) => { const b = document.createElement('button'); b.type = 'button'; b.addEventListener('click', () => write(i)); hd.appendChild(b); });
+  const dotLabels = () => [...hd.children].forEach((b, i) => b.setAttribute('aria-label', T('ציטוט ', 'Quote ') + (i + 1)));
+  dotLabels();
+  function write(i) {
+    clearTimeout(qt); clearTimeout(qt2); hand.classList.add('out');
+    qt2 = setTimeout(() => {
+      qi = i; hand.classList.remove('out'); ha.classList.remove('on');
+      const q = QUOTES[i], txt = T(q[0], q[1]);
+      let k = 0; hq.innerHTML = txt.split(' ').map(w => `<span class="w">${[...w].map(ch => `<span class="ch" style="--i:${k++}">${ch}</span>`).join('')}</span>`).join(' ');
+      ha.textContent = T(q[2], q[3]);
+      setTimeout(() => ha.classList.add('on'), txt.length * 45 + 300);
+      [...hd.children].forEach((b, k) => b.setAttribute('aria-current', k === i));
+      qt = setTimeout(() => write((qi + 1) % QUOTES.length), txt.length * 45 + 4200);
+    }, qi < 0 ? 0 : 800);
+  }
+  new IntersectionObserver(es => { if (es[0].isIntersecting && qi < 0) write(0); }, { threshold: .3 }).observe(document.querySelector('.words'));
+
+  /* ---------- form ---------- */
+  $('form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const n = $('c-name').value.trim(), ph = $('c-phone').value.trim(), em = $('c-mail').value.trim(), msg = $('c-msg').value.trim();
+    const note = $('note'), btn = e.target.querySelector('button[type=submit]');
+    if (!n) { note.textContent = T('נשמח לשם, כדי שנדע איך לפנות אליכם.', 'Please add your name so we know how to address you.'); return; }
+    if (!ph && !em) { note.textContent = T('נשמח לטלפון או אימייל לחזרה.', 'Please leave a phone number or email so we can reply.'); return; }
+    const B = window.TOBackend;
+    if (!B || !B.ready) { note.textContent = T(`תודה ${n}! בגרסה החיה הפנייה תישלח ישירות לסטודיו.`, `Thank you, ${n}! On the live site your message will go straight to the studio.`); return; }
+    btn.disabled = true; note.textContent = T('שולחת…', 'Sending…');
+    try {
+      await B.submitLead({ name: n, phone: ph, email: em, message: msg, lang });
+      e.target.reset(); note.textContent = T(`תודה ${n}! הפנייה התקבלה ונחזור אליכם בהקדם.`, `Thank you, ${n}! Your message was received — we’ll be in touch soon.`);
+    } catch (err) {
+      note.textContent = T('משהו השתבש בשליחה. אפשר לנסות שוב או להתקשר: 052-767-0335', 'Something went wrong. Please try again or call +972 52-767-0335.');
+    } finally { btn.disabled = false; }
+  });
+
+  /* ---------- language switch ---------- */
+  function setLang(l, save) {
+    lang = l === 'en' ? 'en' : 'he';
+    const dir = lang === 'en' ? 'ltr' : 'rtl';
+    document.documentElement.lang = lang; document.documentElement.dir = dir;
+    ['page', 'hdr', 'pv', 'mnav'].forEach(id => { const el = $(id); el.dir = dir; el.lang = lang; });
+    document.querySelectorAll('[data-t]').forEach(n => { const k = n.dataset.t; n.innerHTML = lang === 'en' ? (EN[k] ?? HE[k]) : HE[k]; });
+    document.querySelectorAll('[data-ta]').forEach(n => { const k = n.dataset.ta, val = lang === 'en' ? (EN[k] ?? HEA[k]) : HEA[k]; n.setAttribute(n.tagName === 'IMG' ? 'alt' : 'aria-label', val); });
+    $('pv-prev').textContent = lang === 'en' ? '←' : '→'; $('pv-next').textContent = lang === 'en' ? '→' : '←';
+    document.querySelectorAll('.lang button').forEach(b => b.setAttribute('aria-pressed', b.dataset.lang === lang));
+    document.title = lang === 'en' ? 'Tzira Openhaim · Interior Design Studio' : 'צירה אופנהיים · סטודיו לעיצוב פנים';
+    dotLabels(); $('note').textContent = '';
+    if (cur && !pv.hidden) meta();
+    if (qi >= 0) { qi = qi; write(qi); }
+    if (save) { try { localStorage.setItem('to-lang', lang); } catch (e) {} }
+  }
+  document.querySelectorAll('.lang button').forEach(b => b.addEventListener('click', () => setLang(b.dataset.lang, true)));
+  let start = 'he'; try { start = localStorage.getItem('to-lang') || (location.hash === '#en' ? 'en' : 'he'); } catch (e) {}
+  if (start === 'en') setLang('en');
+})();
+</script>
+<script src="js/config.js" onerror=""></script>
+<script src="js/backend.js" defer onerror=""></script>
+
+</body>
+</html>
