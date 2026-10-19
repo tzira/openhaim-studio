@@ -29,6 +29,12 @@ create index if not exists leads_created_idx on public.leads (created_at desc);
 alter table public.leads enable row level security;
 alter table public.visits enable row level security;
 
+-- table privileges (RLS above still decides which rows; these make the tables reachable through the API)
+grant usage on schema public to anon, authenticated;
+grant insert on public.leads, public.visits to anon;
+grant select, insert, update, delete on public.leads to authenticated;
+grant select on public.visits to authenticated;
+
 -- the public site may only ADD rows
 drop policy if exists "site inserts leads" on public.leads;
 create policy "site inserts leads" on public.leads for insert to anon with check (status = 'new' and handled_at is null);
