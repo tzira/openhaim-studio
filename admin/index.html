@@ -46,7 +46,6 @@ header { position: sticky; top: 0; z-index: 5; background: rgba(245,241,235,.94)
 .who { justify-self: end; display: flex; align-items: center; gap: 14px; font-size: 13px; color: var(--muted); }
 main { max-width: 1180px; margin: 0 auto; padding: 32px 20px 80px; }
 h2 { font-family: var(--f-he); font-weight: 400; font-size: 34px; margin: 6px 0 22px; }
-.demo { background: #F3E4D2; color: #6E4A2C; text-align: center; padding: 8px 12px; font-size: 13px; }
 
 /* leads */
 .bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; margin-bottom: 20px; }
@@ -109,7 +108,6 @@ td.ltr { direction: ltr; text-align: end; color: var(--muted); max-width: 260px;
 </head>
 <body>
 
-<div class="demo" id="demo" hidden>מצב תצוגה: הנתונים כאן לדוגמה בלבד, כדי לראות איך האזור ייראה. הנתונים האמיתיים יופיעו אחרי החיבור למסד הנתונים.</div>
 
 <section class="login" id="login" hidden>
   <form id="login-form">
@@ -173,27 +171,23 @@ td.ltr { direction: ltr; text-align: end; color: var(--muted); max-width: 260px;
 (() => {
   const $ = id => document.getElementById(id);
   const C = window.TO_CONFIG || {};
-  const DEMO = /[?&]demo/.test(location.search) || !C.SUPABASE_URL || !C.SUPABASE_ANON_KEY;
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const fmt = d => new Date(d).toLocaleString('he-IL', { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' });
   const DEV = { mobile: 'נייד', desktop: 'מחשב', tablet: 'טאבלט' };
   const toast = t => { const el = document.createElement('div'); el.className = 'toast'; el.textContent = t; document.body.appendChild(el); setTimeout(() => el.remove(), 3200); };
-  let sb = null, leads = [], filter = 'new', range = 7, visits = [], demoLeads = [], demoVisits = [];
+  let sb = null, leads = [], filter = 'new', range = 7, visits = [];
 
   /* ---------- data layer ---------- */
   const store = {
     async leads() {
-      if (DEMO) return demoLeads;
       const { data, error } = await sb.from('leads').select('*').order('created_at', { ascending: false }).limit(1000);
       if (error) throw error; return data;
     },
     async update(id, patch) {
-      if (DEMO) { Object.assign(demoLeads.find(l => l.id === id), patch); return; }
       const { error } = await sb.from('leads').update(patch).eq('id', id); if (error) throw error;
     },
     async visits(days) {
       const since = new Date(Date.now() - days * 864e5); since.setHours(0, 0, 0, 0);
-      if (DEMO) return demoVisits.filter(v => new Date(v.created_at) >= since);
       const { data, error } = await sb.from('visits').select('created_at,source,device,lang,referrer,utm_campaign,session_id').gte('created_at', since.toISOString()).order('created_at', { ascending: false }).limit(20000);
       if (error) throw error; return data;
     },
@@ -274,7 +268,7 @@ td.ltr { direction: ltr; text-align: end; color: var(--muted); max-width: 260px;
     $('login').hidden = true; $('app').hidden = false; $('who').textContent = email || '';
     try { leads = await store.leads(); } catch (err) { toast('אין הרשאה לקרוא פניות — בדקי שהמייל זהה למייל בהגדרות'); leads = []; }
     renderLeads();
-    if (DEMO || !sb) return;
+    if (!sb) return;
     sb.channel('studio').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'leads' }, p => {
       leads.unshift({ ...p.new, _fresh: true }); renderLeads(); toast('פנייה חדשה מ' + p.new.name);
     }).on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'visits' }, p => {
@@ -282,9 +276,8 @@ td.ltr { direction: ltr; text-align: end; color: var(--muted); max-width: 260px;
     }).subscribe();
   }
 
-  if (DEMO) { $('demo').hidden = false; buildDemo(); startApp('demo@studio'); return; }
   if (!C.SUPABASE_URL || !C.SUPABASE_ANON_KEY || !window.supabase) {
-    $('login').hidden = false; $('login-msg').textContent = 'האזור עדיין לא מחובר למסד הנתונים (js/config.js). לתצוגה: הוסיפי ?demo לכתובת.'; $('login-b').disabled = true; return;
+    $('login').hidden = false; $('login-msg').textContent = 'האזור עדיין לא מחובר למסד הנתונים.'; $('login-b').disabled = true; return;
   }
   sb = window.supabase.createClient(C.SUPABASE_URL, C.SUPABASE_ANON_KEY);
   sb.auth.getSession().then(({ data }) => { if (data.session) startApp(data.session.user.email); else $('login').hidden = false; });
@@ -301,19 +294,6 @@ td.ltr { direction: ltr; text-align: end; color: var(--muted); max-width: 260px;
   });
   $('logout').addEventListener('click', async () => { await sb.auth.signOut(); location.reload(); });
 
-  /* ---------- demo data (preview only) ---------- */
-  function buildDemo() {
-    const now = Date.now(), H = 36e5, rnd = (a, b) => a + Math.floor(Math.random() * (b - a));
-    demoLeads = [
-      { id: 1, created_at: new Date(now - 2 * H).toISOString(), name: 'לקוחה לדוגמה א׳', phone: '050-000-0001', email: 'example1@example.com', message: 'פנייה לדוגמה: דירת 5 חדרים, מעוניינים בליווי מלא.', source: 'Instagram', lang: 'he', status: 'new', note: '' },
-      { id: 2, created_at: new Date(now - 20 * H).toISOString(), name: 'Example Client B', phone: '', email: 'example2@example.com', message: 'Sample enquiry: apartment for a family relocating from abroad.', source: 'Google', lang: 'en', status: 'new', note: '' },
-      { id: 3, created_at: new Date(now - 70 * H).toISOString(), name: 'לקוח לדוגמה ג׳', phone: '050-000-0003', email: '', message: 'פנייה לדוגמה: מייקאובר לסלון.', source: 'WhatsApp', lang: 'he', status: 'handled', handled_at: new Date(now - 50 * H).toISOString(), note: 'הערה לדוגמה' },
-    ];
-    const srcs = ['Google', 'Google', 'Instagram', 'Instagram', 'ישיר', 'WhatsApp', 'Facebook', 'Pinterest'], devs = ['mobile', 'mobile', 'mobile', 'desktop', 'desktop', 'tablet'];
-    for (let i = 0; i < 260; i++) { const s = srcs[rnd(0, srcs.length)]; demoVisits.push({ created_at: new Date(now - Math.random() ** 1.4 * 30 * 864e5).toISOString(), source: s, device: devs[rnd(0, devs.length)], lang: Math.random() < .25 ? 'en' : 'he', referrer: s === 'ישיר' ? '' : 'https://example.com/', utm_campaign: Math.random() < .1 ? 'sample-campaign' : null, session_id: 's' + i }); }
-    for (let i = 0; i < 3; i++) demoVisits.push({ created_at: new Date(now - rnd(10, 200) * 1e3).toISOString(), source: 'Instagram', device: 'mobile', lang: 'he', referrer: '', session_id: 'live' + i });
-    demoVisits.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-  }
 })();
 </script>
 </body>
