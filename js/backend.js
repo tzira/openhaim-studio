@@ -5,7 +5,8 @@
   window.TOBackend = api;
   if (!C.SUPABASE_URL || !C.SUPABASE_ANON_KEY) return;
   const base = C.SUPABASE_URL.replace(/\/$/, '') + '/rest/v1/';
-  const headers = { apikey: C.SUPABASE_ANON_KEY, Authorization: 'Bearer ' + C.SUPABASE_ANON_KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' };
+  const headers = { apikey: C.SUPABASE_ANON_KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' };
+  if (/^eyJ/.test(C.SUPABASE_ANON_KEY)) headers.Authorization = 'Bearer ' + C.SUPABASE_ANON_KEY;  // legacy JWT keys only
   const post = (table, row) => fetch(base + table, { method: 'POST', headers, body: JSON.stringify(row), keepalive: true })
     .then(r => { if (!r.ok) throw new Error(table + ' ' + r.status); });
 
