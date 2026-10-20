@@ -193,8 +193,8 @@ td.ltr { direction: ltr; text-align: end; color: var(--muted); max-width: 260px;
   const fmt = d => new Date(d).toLocaleString('he-IL', { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' });
   const DEV = { mobile: 'נייד', desktop: 'מחשב', tablet: 'טאבלט' };
   const SRC = x => (!x || x === 'ישיר') ? 'לינק' : x;
-  const VIS = v => v.returning === true ? '<span class="vis-ret">חוזר</span>' : v.returning === false ? '<span class="vis-new">חדש</span>' : '—';
-  const nr = arr => { const n = arr.filter(v => v.returning === false).length, r = arr.filter(v => v.returning === true).length; return [n, r]; };
+  const VIS = v => v.is_returning === true ? '<span class="vis-ret">חוזר</span>' : v.is_returning === false ? '<span class="vis-new">חדש</span>' : '—';
+  const nr = arr => { const n = arr.filter(v => v.is_returning === false).length, r = arr.filter(v => v.is_returning === true).length; return [n, r]; };
   const toast = t => { const el = document.createElement('div'); el.className = 'toast'; el.textContent = t; document.body.appendChild(el); setTimeout(() => el.remove(), 3200); };
   let sb = null, leads = [], filter = 'new', range = 7, visits = [];
 

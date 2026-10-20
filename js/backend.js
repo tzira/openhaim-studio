@@ -27,7 +27,7 @@
 
   if (!/[?&]notrack/.test(location.search)) {
     let seen = false; try { seen = sessionStorage.getItem('to-seen') === '1'; sessionStorage.setItem('to-seen', '1'); } catch (e) {}
-    if (!seen) post('visits', { ...ctx, path: location.pathname, visitor_id: vid || null, returning })
+    if (!seen) post('visits', { ...ctx, path: location.pathname, visitor_id: vid || null, is_returning: returning })
       .catch(() => post('visits', { ...ctx, path: location.pathname }).catch(() => {}));   // older table without the new columns
   }
   api.ready = true;
