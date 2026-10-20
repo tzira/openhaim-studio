@@ -72,7 +72,17 @@ h2 { font-family: var(--f-he); font-weight: 400; font-size: 34px; margin: 6px 0 
 .empty { text-align: center; color: var(--muted); padding: 60px 0; }
 
 /* stats */
-.kpis { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 18px; }
+.overview { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 34px; }
+.ov { background: var(--card); border: 1px solid var(--line); padding: 16px 18px; display: grid; gap: 4px; text-align: start; font: inherit; color: inherit; }
+.ov b { font-family: var(--f-en); font-weight: 400; font-size: 38px; line-height: 1; direction: ltr; text-align: start; }
+.ov span { font-size: 13px; color: var(--muted); }
+.ov small { font-size: 12px; color: var(--ink2); }
+.ov-new { cursor: pointer; border-color: rgba(160,98,58,.35); background: #FBF3EA; }
+.ov-new b { color: var(--new); }
+.ov-live b { color: var(--new); }
+.vis-new { color: var(--ok); font-weight: 600; } .vis-ret { color: var(--bronze); }
+@media (max-width: 900px) { .overview { grid-template-columns: repeat(2, 1fr); } }
+.kpis { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 18px; }
 .kpi { background: var(--card); border: 1px solid var(--line); padding: 18px 18px 16px; display: grid; gap: 4px; }
 .kpi b { font-family: var(--f-en); font-weight: 400; font-size: 40px; line-height: 1; direction: ltr; text-align: start; }
 .kpi span { font-size: 13px; color: var(--muted); }
@@ -131,6 +141,13 @@ td.ltr { direction: ltr; text-align: end; color: var(--muted); max-width: 260px;
     <div class="who"><span id="who"></span><button class="btn ghost" type="button" id="logout" style="padding:7px 14px">יציאה</button></div>
   </div></header>
   <main>
+    <section class="overview" aria-label="סקירה">
+      <button class="ov ov-new" type="button" id="ov-new-b"><b id="ov-new">0</b><span>פניות חדשות שלא טופלו</span></button>
+      <div class="ov ov-live"><b id="ov-live">0</b><span><i class="live-dot"></i>גולשים עכשיו</span></div>
+      <div class="ov"><b id="ov-today">0</b><span>כניסות היום</span><small id="ov-today-nr"></small></div>
+      <div class="ov"><b id="ov-week">0</b><span>כניסות ב-7 ימים</span><small id="ov-week-nr"></small></div>
+      <div class="ov"><b id="ov-month">0</b><span>כניסות ב-30 ימים</span></div>
+    </section>
     <section id="tab-leads">
       <span class="cap">Leads</span><h2>פניות מהאתר</h2>
       <div class="bar">
@@ -154,13 +171,14 @@ td.ltr { direction: ltr; text-align: end; color: var(--muted); max-width: 260px;
         <div class="kpi"><b id="k-today">0</b><span>ביקורים היום</span></div>
         <div class="kpi"><b id="k-leads">0</b><span>פניות בתקופה</span></div>
         <div class="kpi"><b id="k-conv">0%</b><span>אחוז פניות מביקורים</span></div>
+        <div class="kpi"><b id="k-nr">0 / 0</b><span>מבקרים חדשים / חוזרים</span></div>
       </div>
       <div class="grid2">
         <div class="panel"><h4>ביקורים לפי יום</h4><div class="days" id="days"></div></div>
         <div class="panel"><h4>מאיפה הגיעו</h4><div class="rows" id="sources"></div></div>
       </div>
       <div class="grid2">
-        <div class="panel"><h4>ביקורים אחרונים</h4><table><thead><tr><th>מתי</th><th>מקור</th><th>מכשיר</th><th>שפה</th><th>הגיעו מהקישור</th></tr></thead><tbody id="recent"></tbody></table></div>
+        <div class="panel"><h4>ביקורים אחרונים</h4><table><thead><tr><th>מתי</th><th>מבקר</th><th>מקור</th><th>מכשיר</th><th>שפה</th><th>הגיעו מהקישור</th></tr></thead><tbody id="recent"></tbody></table></div>
         <div class="panel"><h4>מכשירים</h4><div class="rows" id="devices"></div><h4 style="margin-top:26px">קמפיינים (utm)</h4><div class="rows" id="camps"></div></div>
       </div>
     </section>
@@ -174,6 +192,9 @@ td.ltr { direction: ltr; text-align: end; color: var(--muted); max-width: 260px;
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const fmt = d => new Date(d).toLocaleString('he-IL', { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' });
   const DEV = { mobile: 'נייד', desktop: 'מחשב', tablet: 'טאבלט' };
+  const SRC = x => (!x || x === 'ישיר') ? 'לינק' : x;
+  const VIS = v => v.returning === true ? '<span class="vis-ret">חוזר</span>' : v.returning === false ? '<span class="vis-new">חדש</span>' : '—';
+  const nr = arr => { const n = arr.filter(v => v.returning === false).length, r = arr.filter(v => v.returning === true).length; return [n, r]; };
   const toast = t => { const el = document.createElement('div'); el.className = 'toast'; el.textContent = t; document.body.appendChild(el); setTimeout(() => el.remove(), 3200); };
   let sb = null, leads = [], filter = 'new', range = 7, visits = [];
 
@@ -188,7 +209,7 @@ td.ltr { direction: ltr; text-align: end; color: var(--muted); max-width: 260px;
     },
     async visits(days) {
       const since = new Date(Date.now() - days * 864e5); since.setHours(0, 0, 0, 0);
-      const { data, error } = await sb.from('visits').select('created_at,source,device,lang,referrer,utm_campaign,session_id').gte('created_at', since.toISOString()).order('created_at', { ascending: false }).limit(20000);
+      const { data, error } = await sb.from('visits').select('*').gte('created_at', since.toISOString()).order('created_at', { ascending: false }).limit(20000);
       if (error) throw error; return data;
     },
   };
@@ -198,14 +219,14 @@ td.ltr { direction: ltr; text-align: end; color: var(--muted); max-width: 260px;
     const q = $('q').value.trim().toLowerCase();
     const n = { new: 0, handled: 0, all: leads.length }; leads.forEach(l => n[l.status]++);
     $('c-new').textContent = n.new; $('c-handled').textContent = n.handled; $('c-all').textContent = n.all;
-    $('badge').textContent = n.new; $('badge').hidden = !n.new;
+    $('badge').textContent = n.new; $('badge').hidden = !n.new; if ($('ov-new')) $('ov-new').textContent = n.new;
     document.title = (n.new ? `(${n.new}) ` : '') + 'ניהול · Tzira Openhaim Studio';
     const list = leads.filter(l => (filter === 'all' || l.status === filter) && (!q || [l.name, l.phone, l.email, l.message, l.note].join(' ').toLowerCase().includes(q)));
     $('leads').innerHTML = list.length ? list.map(l => {
       const tel = (l.phone || '').replace(/[^\d+]/g, ''), wa = tel.replace(/^0/, '972').replace(/^\+/, '');
       return `<article class="lead ${l.status === 'handled' ? 'handled' : ''} ${l._fresh ? 'fresh' : ''}" data-id="${l.id}">
         <div><h3>${esc(l.name)} <span class="st">${l.status === 'handled' ? 'טופלה' : 'חדשה'}</span></h3>
-          <div class="meta">${fmt(l.created_at)}${l.source ? ' · הגיעו דרך ' + esc(l.source) : ''}${l.lang === 'en' ? ' · באנגלית' : ''}${l.handled_at ? ' · טופלה ' + fmt(l.handled_at) : ''}</div></div>
+          <div class="meta">${fmt(l.created_at)}${l.source ? ' · הגיעו דרך ' + esc(SRC(l.source)) : ''}${l.lang === 'en' ? ' · באנגלית' : ''}${l.handled_at ? ' · טופלה ' + fmt(l.handled_at) : ''}</div></div>
         <div class="acts"><button class="btn ${l.status === 'handled' ? 'ghost' : ''}" type="button" data-toggle>${l.status === 'handled' ? 'החזרה לחדשה' : 'סימון כטופלה ✓'}</button></div>
         <div class="contact">${l.phone ? `<a href="tel:${esc(tel)}">${esc(l.phone)}</a><a href="https://wa.me/${esc(wa)}" target="_blank" rel="noopener">WhatsApp</a>` : ''}${l.email ? `<a href="mailto:${esc(l.email)}">${esc(l.email)}</a>` : ''}</div>
         ${l.message ? `<p class="m">${esc(l.message)}</p>` : ''}
@@ -246,11 +267,29 @@ td.ltr { direction: ltr; text-align: end; color: var(--muted); max-width: 260px;
     for (let i = nd - 1; i >= 0; i--) { const d = new Date(today); d.setDate(d.getDate() - i); const e2 = new Date(d); e2.setDate(e2.getDate() + 1); byDay.push([d, visits.filter(v => { const t = new Date(v.created_at); return t >= d && t < e2; }).length]); }
     const mx = Math.max(1, ...byDay.map(x => x[1]));
     $('days').innerHTML = byDay.map(([d, v], i) => `<div title="${v} ביקורים"><em>${v || ''}</em><i style="height:${Math.round(v / mx * 120)}px"></i><small>${(nd <= 14 || i % 3 === 0) ? d.getDate() + '.' + (d.getMonth() + 1) : ''}</small></div>`).join('');
-    bars($('sources'), count(visits, v => v.source).slice(0, 8), visits.length);
+    bars($('sources'), count(visits, v => SRC(v.source)).slice(0, 8), visits.length);
+    { const [n, r] = nr(visits); $('k-nr').textContent = n + ' / ' + r; }
     bars($('devices'), count(visits, v => DEV[v.device] || v.device), visits.length);
     bars($('camps'), count(visits.filter(v => v.utm_campaign), v => v.utm_campaign).slice(0, 6), visits.length);
-    $('recent').innerHTML = visits.slice(0, 14).map(v => `<tr><td>${fmt(v.created_at)}</td><td>${esc(v.source)}</td><td>${DEV[v.device] || ''}</td><td>${v.lang === 'en' ? 'EN' : 'עב'}</td><td class="ltr">${esc(v.referrer || '—')}</td></tr>`).join('') || '<tr><td colspan="5" class="meta">אין ביקורים בתקופה הזו</td></tr>';
+    $('recent').innerHTML = visits.slice(0, 14).map(v => `<tr><td>${fmt(v.created_at)}</td><td>${VIS(v)}</td><td>${esc(SRC(v.source))}</td><td>${DEV[v.device] || ''}</td><td>${v.lang === 'en' ? 'EN' : 'עב'}</td><td class="ltr">${esc(v.referrer || '—')}</td></tr>`).join('') || '<tr><td colspan="6" class="meta">אין ביקורים בתקופה הזו</td></tr>';
   }
+  let ovVisits = [];
+  async function loadOverview() {
+    try { const since = new Date(Date.now() - 30 * 864e5); const { data, error } = await sb.from('visits').select('*').gte('created_at', since.toISOString()).order('created_at', { ascending: false }).limit(20000); if (error) throw error; ovVisits = data; } catch (e) { ovVisits = []; }
+    renderOverview();
+  }
+  function renderOverview() {
+    const d0 = new Date(); d0.setHours(0, 0, 0, 0); const w = new Date(d0); w.setDate(w.getDate() - 6);
+    const today = ovVisits.filter(v => new Date(v.created_at) >= d0), week = ovVisits.filter(v => new Date(v.created_at) >= w);
+    $('ov-new').textContent = leads.filter(l => l.status === 'new').length;
+    $('ov-today').textContent = today.length; $('ov-week').textContent = week.length; $('ov-month').textContent = ovVisits.length;
+    const [tn, tr] = nr(today), [wn, wr] = nr(week);
+    $('ov-today-nr').textContent = today.length ? `${tn} חדשים · ${tr} חוזרים` : '';
+    $('ov-week-nr').textContent = week.length ? `${wn} חדשים · ${wr} חוזרים` : '';
+    const t = Date.now() - 5 * 60e3; $('ov-live').textContent = new Set(ovVisits.filter(v => new Date(v.created_at) > t).map(v => v.session_id)).size;
+  }
+  $('ov-new-b').addEventListener('click', () => { document.querySelector('.tabs [data-tab=leads]').click(); document.querySelector('#filters [data-f=new]').click(); });
+  setInterval(() => renderOverview(), 30e3);
   function live() { const t = Date.now() - 5 * 60e3; $('k-live').textContent = new Set(visits.filter(v => new Date(v.created_at) > t).map(v => v.session_id)).size; }
   setInterval(live, 30e3);
   $('ranges').addEventListener('click', e => { const c = e.target.closest('[data-r]'); if (!c) return; range = +c.dataset.r; [...$('ranges').children].forEach(x => x.setAttribute('aria-pressed', x === c)); renderStats(); });
@@ -269,9 +308,11 @@ td.ltr { direction: ltr; text-align: end; color: var(--muted); max-width: 260px;
     try { leads = await store.leads(); } catch (err) { toast('אין הרשאה לקרוא פניות — בדקי שהמייל זהה למייל בהגדרות'); leads = []; }
     renderLeads();
     if (!sb) return;
+    loadOverview();
     sb.channel('studio').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'leads' }, p => {
       leads.unshift({ ...p.new, _fresh: true }); renderLeads(); toast('פנייה חדשה מ' + p.new.name);
     }).on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'visits' }, p => {
+      ovVisits.unshift(p.new); renderOverview();
       if (new Date(p.new.created_at) >= new Date(Date.now() - range * 864e5)) { visits.unshift(p.new); if (!$('tab-stats').hidden) renderStats(); else live(); }
     }).subscribe();
   }

@@ -21,8 +21,11 @@ create table if not exists public.visits (
   created_at timestamptz not null default now(),
   path text, source text, referrer text,
   utm_source text, utm_medium text, utm_campaign text,
-  device text, lang text, session_id text
+  device text, lang text, session_id text,
+  visitor_id text, returning boolean
 );
+alter table public.visits add column if not exists visitor_id text;
+alter table public.visits add column if not exists returning boolean;
 create index if not exists visits_created_idx on public.visits (created_at desc);
 create index if not exists leads_created_idx on public.leads (created_at desc);
 
