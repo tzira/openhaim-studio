@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
-  <url>
-    <loc>https://openhaimstudio.com/</loc>
-    <xhtml:link rel="alternate" hreflang="he" href="https://openhaimstudio.com/"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://openhaimstudio.com/?lang=en"/>
-    <changefreq>monthly</changefreq><priority>1.0</priority>
-  </url>
-  <url>
-    <loc>https://openhaimstudio.com/?lang=en</loc>
-    <xhtml:link rel="alternate" hreflang="he" href="https://openhaimstudio.com/"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://openhaimstudio.com/?lang=en"/>
-    <changefreq>monthly</changefreq><priority>0.9</priority>
-  </url>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://openhaimstudio.com/</loc><changefreq>monthly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://openhaimstudio.com/about/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://openhaimstudio.com/projects/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://openhaimstudio.com/projects/golden-hour/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://openhaimstudio.com/projects/little-daydreams/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://openhaimstudio.com/projects/the-quiet-haven/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://openhaimstudio.com/services/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://openhaimstudio.com/services/full-service/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://openhaimstudio.com/services/express-makeover/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://openhaimstudio.com/contact/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://openhaimstudio.com/?lang=en</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
 </urlset>
